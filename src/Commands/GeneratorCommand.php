@@ -17,7 +17,7 @@ use Symfony\Component\Console\Style\SymfonyStyle;
  * @phpstan-type Manifest           array{namespace: string, versions: array<string, string>, serviceIdentifier: string}
  * @phpstan-type DataMetadata       array{apiVersion: string, serviceId: string}
  * @phpstan-type DataOperation      array{name: string, input?: array{shape: string}, output?: array{shape: string}, errors?: list<array{shape: string}>}
- * @phpstan-type DataShapeCommon    array{type: string, enum?: list<string>}
+ * @phpstan-type DataShapeCommon    array{type: string, enum?: list<string>, min?: int, max?: int}
  * @phpstan-type DataShapeStructure array{type: 'structure', required?: list<string>, members: array<string, array{shape: string}>}
  * @phpstan-type DataShapeMap       array{type: 'map', key: array{shape: string}, value: array{shape: string}}
  * @phpstan-type DataShapeList      array{type: 'list', member: array{shape: string}}

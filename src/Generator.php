@@ -72,7 +72,12 @@ readonly class Generator
 
         return match ($shape['type']) {
             'string', 'byte', 'character', 'blob' => 'string',
-            'integer', 'long' => 'int',
+            'integer', 'long' => (fn() => match (true) {
+                isset($shape['min'], $shape['max']) => "int<{$shape['min']}, {$shape['max']}>",
+                isset($shape['min'])                => "int<{$shape['min']}, max>",
+                isset($shape['max'])                => "int<min, {$shape['max']}>",
+                default                             => 'int',
+            })(),
             'float'     => 'float',
             'double'    => 'double',
             'boolean'   => 'bool',
