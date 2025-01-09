@@ -9,3 +9,5 @@ parameters:
         - bin
         - src
         - tests
+
+    tmpDir: %rootDir%/tmp

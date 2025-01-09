@@ -45,12 +45,27 @@ jobs:
           max_attempts: 3
           command: php bin/app.php app:generate -vvv
 
+      - name: Restore PHPStan Result cache
+        uses: actions/cache/restore@v4
+        with:
+          path: vendor/phpstan/phpstan/tmp
+          key: "phpstan-result-cache-${{ github.run_id }}"
+          restore-keys: |
+            phpstan-result-cache-
+
       - name: Analyze Structures
         uses: nick-fields/retry@v3
         with:
           timeout_seconds: 600
           max_attempts: 3
           command: php vendor/bin/phpstan analyse --ansi --memory-limit=-1 -v -c phpstan-generated.neon.dist
+
+      - name: Save PHPStan Result cache
+        uses: actions/cache/save@v4
+        if: always()
+        with:
+          path: vendor/phpstan/phpstan/tmp
+          key: "phpstan-result-cache-${{ github.run_id }}"
 
       - name: Commit Files
         run: |
