@@ -1,0 +1,60 @@
+name: Update Structures from AWS SDK for PHP
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '0 21 * * *'
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install dependencies
+        uses: nick-fields/retry@v3
+        with:
+          timeout_seconds: 120
+          max_attempts: 3
+          command: composer install --quiet --no-plugins --no-ansi --prefer-dist --no-progress --no-interaction
+
+      - name: Check AWS SDK for PHP
+        id: aws-sdk-php
+        run: composer outdated aws/aws-sdk-php --quiet --strict
+        continue-on-error: true
+
+      - name: Successful Termination Workflow
+        run: exit 0
+        if: steps.aws-sdk-php.outcome == 'success'
+
+      - name: Bump AWS SDK for PHP
+        run: composer require aws/aws-sdk-php:$(composer outdated aws/aws-sdk-php --format=json | jq -r .latest) --quiet --no-plugins --no-ansi --prefer-dist --no-progress --no-interaction
+        if: steps.aws-sdk-php.outcome == 'failure'
+
+      - name: Update Structures
+        uses: nick-fields/retry@v3
+        with:
+          timeout_seconds: 600
+          max_attempts: 3
+          command: php bin/app.php app:generate -vvv
+
+      - name: Analyze Structures
+        uses: nick-fields/retry@v3
+        with:
+          timeout_seconds: 600
+          max_attempts: 3
+          command: php vendor/bin/phpstan analyse --ansi --memory-limit=-1 -v -c phpstan-generated.neon.dist
+
+      - name: Commit Files
+        run: |
+          git config --global user.name "${GITHUB_ACTOR}"
+          git config --global user.email "${GITHUB_ACTOR}@users.noreply.github.com"
+          git commit -am "Update Structures"
+          git push
