@@ -61,6 +61,8 @@ readonly class Generator
 
     /**
      * @param DataShape $shape
+     *
+     * @see https://docs.aws.amazon.com/sdk-for-php/v3/developer-guide/guide_streams.html
      */
     protected function resolvePrimitiveTypes(array $shape): ?string
     {
@@ -71,7 +73,7 @@ readonly class Generator
         }
 
         return match ($shape['type']) {
-            'string', 'byte', 'character', 'blob' => 'string',
+            'string', 'byte', 'character' => 'string',
             'integer', 'long' => (fn() => match (true) {
                 isset($shape['min'], $shape['max']) => "int<{$shape['min']}, {$shape['max']}>",
                 isset($shape['min'])                => "int<{$shape['min']}, max>",
@@ -82,7 +84,7 @@ readonly class Generator
             'double'    => 'double',
             'boolean'   => 'bool',
             'timestamp' => '\Aws\Api\DateTimeResult',
-            'list', 'map', 'structure' => null,
+            'blob', 'list', 'map', 'structure' => null,
             default => throw new \InvalidArgumentException("Unknown type: {$shape['type']}"),
         };
     }

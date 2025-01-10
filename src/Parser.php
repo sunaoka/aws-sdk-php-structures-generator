@@ -44,24 +44,25 @@ class Parser
         // Request
         if (isset($operation['input']['shape'])) {
             $this->request = $operation['input']['shape'];
-            $shapes = $this->retrieveShape($this->request, $this->request, $shapes);
+            $shapes = $this->retrieveShape('request', $this->request, $this->request, $shapes);
         }
 
         // Response
         if (isset($operation['output']['shape'])) {
             $this->response = $operation['output']['shape'];
-            $this->retrieveShape($this->response, $this->response, $shapes);
+            $this->retrieveShape('response', $this->response, $this->response, $shapes);
         }
 
         $this->shapes = array_values(array_unique($this->shapes));
     }
 
     /**
-     * @param list<string> $shapes
+     * @param 'request'|'response' $type
+     * @param list<string>         $shapes
      *
      * @return list<string>
      */
-    protected function retrieveShape(string $baseShapeName, string $shapeName, array $shapes = []): array
+    protected function retrieveShape(string $type, string $baseShapeName, string $shapeName, array $shapes = []): array
     {
         if (in_array($shapeName, $shapes, true)) {
             return $shapes;
@@ -76,7 +77,7 @@ class Parser
         switch ($shape['type']) {
             case 'list':
                 /** @var DataShapeList $shape */
-                $shapes = $this->retrieveShape($baseShapeName, $shape['member']['shape'], $shapes);
+                $shapes = $this->retrieveShape($type, $baseShapeName, $shape['member']['shape'], $shapes);
 
                 if ($this->types->has($shape['member']['shape'])) {
                     $this->types->add($shapeName, sprintf(
@@ -98,8 +99,8 @@ class Parser
 
             case 'map':
                 /** @var DataShapeMap $shape */
-                $shapes = $this->retrieveShape($baseShapeName, $shape['key']['shape'], $shapes);
-                $shapes = $this->retrieveShape($baseShapeName, $shape['value']['shape'], $shapes);
+                $shapes = $this->retrieveShape($type, $baseShapeName, $shape['key']['shape'], $shapes);
+                $shapes = $this->retrieveShape($type, $baseShapeName, $shape['value']['shape'], $shapes);
 
                 if ($this->types->has($shape['key']['shape']) && $this->types->has($shape['value']['shape'])) {
                     $this->types->add($shapeName, sprintf(
@@ -143,8 +144,20 @@ class Parser
                 /** @var DataShapeStructure $shape */
                 if (count($shape['members']) > 0) {
                     foreach ($shape['members'] as $member) {
-                        $shapes = $this->retrieveShape($baseShapeName, $member['shape'], $shapes);
+                        $shapes = $this->retrieveShape($type, $baseShapeName, $member['shape'], $shapes);
                     }
+                }
+
+                break;
+
+            case 'blob':
+                // Any command with an input field defined as a blob can be satisfied with
+                // a string, a PHP stream resource, or an instance of Psr\Http\Message\StreamInterface.
+                // <https://docs.aws.amazon.com/sdk-for-php/v3/developer-guide/guide_streams.html>
+                if ($type === 'response') {
+                    $this->types->add($shapeName, '\Psr\Http\Message\StreamInterface');
+                } else {
+                    $this->types->add($shapeName, 'string|resource|\Psr\Http\Message\StreamInterface');
                 }
 
                 break;
@@ -152,7 +165,6 @@ class Parser
             case 'string':
             case 'byte':
             case 'character':
-            case 'blob':
             case 'integer':
             case 'long':
             case 'float':
