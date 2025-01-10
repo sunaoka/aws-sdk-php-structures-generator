@@ -56,6 +56,11 @@ jobs:
     if: needs.check-update.outputs.need_update == '1'
 
     steps:
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+
       - name: Restore Repository cache
         uses: actions/cache/restore@v4
         with:
