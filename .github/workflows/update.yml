@@ -6,8 +6,13 @@ on:
     - cron: '30 20 * * *'
 
 jobs:
-  run:
+
+  check-update:
+
     runs-on: ubuntu-latest
+
+    outputs:
+      need_update: ${{ steps.check-aws-sdk.outputs.need_update }}
 
     steps:
       - name: Setup PHP
@@ -25,22 +30,46 @@ jobs:
           max_attempts: 3
           command: composer install --quiet --no-plugins --no-ansi --prefer-dist --no-progress --no-interaction
 
-      - name: Check AWS SDK for PHP
-        id: aws-sdk-php
-        run: composer outdated aws/aws-sdk-php --quiet --strict
-        continue-on-error: true
+      - name: Check the update status of AWS SDK for PHP
+        id: check-aws-sdk
+        run: |
+          if composer outdated aws/aws-sdk-php --quiet --strict; then
+            echo "need_update=0" >> "$GITHUB_OUTPUT"
+          else
+            echo "need_update=1" >> "$GITHUB_OUTPUT"
+          fi
 
-      - name: Successful Termination Workflow
-        run: exit 0
-        if: steps.aws-sdk-php.outcome == 'success'
+      - name: Save Repository cache
+        uses: actions/cache/save@v4
+        if: steps.check-aws-sdk.outputs.need_update == '1'
+        with:
+          path: .
+          key: "repository-cache-${{ github.run_id }}"
+
+
+  update:
+
+    needs: check-update
+
+    runs-on: ubuntu-latest
+
+    if: needs.check-update.outputs.need_update == '1'
+
+    steps:
+      - name: Restore Repository cache
+        uses: actions/cache/restore@v4
+        with:
+          path: .
+          key: "repository-cache-${{ github.run_id }}"
+          restore-keys: |
+            repository-cache-
 
       - name: Bump AWS SDK for PHP
         id: bump-aws-sdk
         run: |
-          AWS_SDK_VERSION=$(composer outdated aws/aws-sdk-php --format=json | jq -r .latest)
-          echo "AWS_SDK_VERSION=$AWS_SDK_VERSION" >> "$GITHUB_OUTPUT"
-          composer require aws/aws-sdk-php:$AWS_SDK_VERSION --quiet --no-plugins --no-ansi --prefer-dist --no-progress --no-interaction
-        if: steps.aws-sdk-php.outcome == 'failure'
+          version=$(composer outdated aws/aws-sdk-php --format=json | jq -r .latest)
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+          composer require aws/aws-sdk-php:$version --quiet --no-plugins --no-ansi --prefer-dist --no-progress --no-interaction
 
       - name: Update Structures
         uses: nick-fields/retry@v3
@@ -73,9 +102,10 @@ jobs:
 
       - name: Commit Files
         run: |
+          version=${{ steps.bump-aws-sdk.outputs.version }}
           git config --global user.name "${GITHUB_ACTOR}"
           git config --global user.email "${GITHUB_ACTOR}@users.noreply.github.com"
-          git commit -am "Update Structures from AWS SDK for PHP ${{ steps.bump-aws-sdk.outputs.AWS_SDK_VERSION }}"
+          git commit -a -m "Update Structures from AWS SDK for PHP $version" -m "<https://github.com/aws/aws-sdk-php/releases/tag/$version>"
           git push
-          git tag ${{ steps.bump-aws-sdk.outputs.AWS_SDK_VERSION }}
-          git push origin ${{ steps.bump-aws-sdk.outputs.AWS_SDK_VERSION }}
+          git tag $version
+          git push origin $version
