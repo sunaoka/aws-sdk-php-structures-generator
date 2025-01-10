@@ -3,7 +3,7 @@ name: Update Structures from AWS SDK for PHP
 on:
   workflow_dispatch:
   schedule:
-    - cron: '0 21 * * *'
+    - cron: '30 20 * * *'
 
 jobs:
   run:
@@ -35,7 +35,11 @@ jobs:
         if: steps.aws-sdk-php.outcome == 'success'
 
       - name: Bump AWS SDK for PHP
-        run: composer require aws/aws-sdk-php:$(composer outdated aws/aws-sdk-php --format=json | jq -r .latest) --quiet --no-plugins --no-ansi --prefer-dist --no-progress --no-interaction
+        id: bump-aws-sdk
+        run: |
+          AWS_SDK_VERSION=$(composer outdated aws/aws-sdk-php --format=json | jq -r .latest)
+          echo "AWS_SDK_VERSION=$AWS_SDK_VERSION" >> "$GITHUB_OUTPUT"
+          composer require aws/aws-sdk-php:$AWS_SDK_VERSION --quiet --no-plugins --no-ansi --prefer-dist --no-progress --no-interaction
         if: steps.aws-sdk-php.outcome == 'failure'
 
       - name: Update Structures
@@ -71,5 +75,7 @@ jobs:
         run: |
           git config --global user.name "${GITHUB_ACTOR}"
           git config --global user.email "${GITHUB_ACTOR}@users.noreply.github.com"
-          git commit -am "Update Structures"
+          git commit -am "Update Structures from AWS SDK for PHP ${{ steps.bump-aws-sdk.outputs.AWS_SDK_VERSION }}"
           git push
+          git tag ${{ steps.bump-aws-sdk.outputs.AWS_SDK_VERSION }}
+          git push origin ${{ steps.bump-aws-sdk.outputs.AWS_SDK_VERSION }}

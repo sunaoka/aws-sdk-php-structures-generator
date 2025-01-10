@@ -5,3 +5,5 @@ parameters:
     paths:
         - classes
         - structures
+
+    tmpDir: %rootDir%/tmp
