@@ -39,12 +39,14 @@ jobs:
             echo "need_update=1" >> "$GITHUB_OUTPUT"
           fi
 
-      - name: Save Repository cache
+      - name: Save Vendor cache
         uses: actions/cache/save@v4
         if: steps.check-aws-sdk.outputs.need_update == '1'
         with:
-          path: .
-          key: "repository-cache-${{ github.run_id }}"
+          path: |
+            vendor
+            composer.lock
+          key: "vendor-cache-${{ github.run_id }}"
 
 
   update:
@@ -61,13 +63,25 @@ jobs:
         with:
           php-version: '8.4'
 
-      - name: Restore Repository cache
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install dependencies
+        uses: nick-fields/retry@v3
+        with:
+          timeout_seconds: 120
+          max_attempts: 3
+          command: composer install --quiet --no-plugins --no-ansi --prefer-dist --no-progress --no-interaction
+
+      - name: Restore Vendor cache
         uses: actions/cache/restore@v4
         with:
-          path: .
-          key: "repository-cache-${{ github.run_id }}"
+          path: |
+            vendor
+            composer.lock
+          key: "vendor-cache-${{ github.run_id }}"
           restore-keys: |
-            repository-cache-
+            vendor-cache-
 
       - name: Bump AWS SDK for PHP
         id: bump-aws-sdk
