@@ -63,16 +63,27 @@ readonly class Model
             return $this->getPhpCode($phpNamespace);
         }
 
-        if ($extends !== Response::class) {
-            $required = $shape['required'] ?? [];
-            $params = [];
-            foreach ($shape['members'] as $name => $member) {
-                $params[$name] = $this->resolveClassName($member['shape'], $namespace);
-            }
 
+        $required = $shape['required'] ?? [];
+        $params = [];
+        foreach ($shape['members'] as $name => $member) {
+            $params[$name] = $this->resolveClassName($member['shape'], $namespace);
+        }
+
+        /** @var array<string, array{type: string, null: string, nullable: bool}> $properties */
+        $properties = [];
+        foreach ($params as $name => $type) {
+            $isRequired = in_array($name, $shape['required'] ?? [], true);
+            $properties[$name] = [
+                'type' => $type . ($isRequired ? '' : '|null'),
+                'null' => $isRequired ? '' : '?',
+            ];
+        }
+
+        if ($extends !== Response::class) {
             $comments = [];
-            foreach ($params as $name => $type) {
-                $comments[] = sprintf('%s%s: %s', $name, in_array($name, $required, true) ? '' : '?', $type);
+            foreach ($properties as $name => $property) {
+                $comments[] = sprintf('%s%s: %s', $name, $property['null'], $property['type']);
             }
 
             $parameter = new Parameter('args');
@@ -96,12 +107,8 @@ readonly class Model
         }
 
         $comments = [];
-        foreach ($shape['members'] as $name => $member) {
-            $comments[] = sprintf(
-                '@property %s $%s',
-                $this->resolveClassName($member['shape'], $namespace),
-                $name,
-            );
+        foreach ($properties as $name => $property) {
+            $comments[] = sprintf('@property %s $%s', $property['type'], $name);
         }
 
         $class->setComment(implode("\n", $comments));
