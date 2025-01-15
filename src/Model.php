@@ -73,7 +73,18 @@ readonly class Model
         /** @var array<string, array{type: string, null: string, nullable: bool}> $properties */
         $properties = [];
         foreach ($params as $name => $type) {
-            $isRequired = in_array($name, $shape['required'] ?? [], true);
+            $isRequired = (function () use ($name, $type, $extends, $shape): bool {
+                if ($extends === Response::class && $type === '\Psr\Http\Message\StreamInterface') {
+                    return true;
+                }
+
+                if (in_array($name, $shape['required'] ?? [], true)) {
+                    return true;
+                }
+
+                return false;
+            })();
+
             $properties[$name] = [
                 'type' => $type . ($isRequired ? '' : '|null'),
                 'null' => $isRequired ? '' : '?',
