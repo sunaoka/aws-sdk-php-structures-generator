@@ -37,6 +37,7 @@ class GeneratorCommand extends Command
     {
         $this->addOption('output', 'o', InputOption::VALUE_REQUIRED, 'The output directory', base_path('structures'));
         $this->addOption('service', 's', InputOption::VALUE_REQUIRED | InputOption::VALUE_IS_ARRAY, 'The service to generate', []);
+        $this->addOption('no-progress', description: 'Do not show progress bar');
     }
 
     protected function execute(InputInterface $input, OutputInterface $output): int
@@ -45,25 +46,31 @@ class GeneratorCommand extends Command
         $this->outputDirectory = (string) $input->getOption('output');
         $this->modelsDirectory = $this->getModelsDirectory();
         $generatedServices = (array) $input->getOption('service');
+        $noProgress = (bool) $input->getOption('no-progress');
 
         $manifest = $this->getManifest();
 
-        $io = new SymfonyStyle($input, $output);
-        $io->progressStart(count($generatedServices) > 0 ? count($generatedServices) : count($manifest));
+        if ($noProgress === false) {
+            $io = new SymfonyStyle($input, $output);
+            $io->progressStart(count($generatedServices) > 0 ? count($generatedServices) : count($manifest));
+        }
 
         foreach ($manifest as $service => $metadata) {
             if (count($generatedServices) > 0 && in_array($metadata['namespace'], $generatedServices, true) === false) {
                 continue;
             }
 
-            $io->progressAdvance();
-
             $this->createModel($metadata['namespace'], $service, $metadata['versions']['latest']);
 
-            usleep(5000);
+            if ($noProgress === false) {
+                $io->progressAdvance();
+                usleep(5000);
+            }
         }
 
-        $io->progressFinish();
+        if ($noProgress === false) {
+            $io->progressFinish();
+        }
 
         return Command::SUCCESS;
     }
