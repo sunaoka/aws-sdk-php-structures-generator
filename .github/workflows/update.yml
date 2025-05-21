@@ -88,7 +88,7 @@ jobs:
         with:
           timeout_seconds: 600
           max_attempts: 3
-          command: php bin/app.php app:generate -vvv
+          command: php bin/app.php app:generate --no-progress
 
       - name: Restore PHPStan Result cache
         uses: actions/cache/restore@v4
@@ -103,7 +103,7 @@ jobs:
         with:
           timeout_seconds: 600
           max_attempts: 3
-          command: php vendor/bin/phpstan analyse --ansi --memory-limit=-1 -v -c phpstan-generated.neon.dist
+          command: php vendor/bin/phpstan analyse --no-progress --memory-limit=-1 -c phpstan-generated.neon.dist
 
       - name: Save PHPStan Result cache
         uses: actions/cache/save@v4
