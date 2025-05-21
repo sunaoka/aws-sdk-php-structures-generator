@@ -11,6 +11,8 @@ trait ReservedWordTrait
      */
     private array $reserved = [
         // https://www.php.net/manual/reserved.keywords.php
+        // PHP Keywords
+        '__halt_compiler',
         'abstract',
         'and',
         'array',
@@ -42,7 +44,7 @@ trait ReservedWordTrait
         'extends',
         'final',
         'finally',
-        'fn',       // >= PHP 7.4
+        'fn', // (as of PHP 7.4)
         'for',
         'foreach',
         'function',
@@ -57,7 +59,7 @@ trait ReservedWordTrait
         'interface',
         'isset',
         'list',
-        'match',    // >= PHP 8.0
+        'match', // (as of PHP 8.0)
         'namespace',
         'new',
         'or',
@@ -65,7 +67,7 @@ trait ReservedWordTrait
         'private',
         'protected',
         'public',
-        'readonly', // >= PHP 8.1.0
+        'readonly', // (as of PHP 8.1.0)
         'require',
         'require_once',
         'return',
@@ -80,13 +82,42 @@ trait ReservedWordTrait
         'while',
         'xor',
         'yield',
+        'yield from',
+        // Compile-time constants
+        '__CLASS__',
+        '__DIR__',
+        '__FILE__',
+        '__FUNCTION__',
+        '__LINE__',
+        '__METHOD__',
+        '__PROPERTY__',
+        '__NAMESPACE__',
+        '__TRAIT__',
 
         // https://www.php.net/manual/reserved.classes.php
+        // Standard Defined Classes
+        'Directory',
+        'stdClass',
+        '__PHP_Incomplete_Class',
+        'Exception',
+        'ErrorException',
+        'php_user_filter',
+        'Closure',
+        'Generator',
+        'ArithmeticError',
+        'AssertionError',
+        'DivisionByZeroError',
+        'Error',
+        'Throwable',
+        'ParseError',
+        'TypeError',
+        // Special classes
         'self',
         'static',
         'parent',
 
         // https://www.php.net/manual/reserved.other-reserved-words.php
+        // Reserved words
         'int',
         'float',
         'bool',
@@ -94,11 +125,15 @@ trait ReservedWordTrait
         'true',
         'false',
         'null',
-        'void',     // >= PHP 7.1
-        'iterable', // >= PHP 7.1
-        'object',   // >= PHP 7.2
-        'mixed',    // >= PHP 8.0
-        'never',    // >= PHP 8.1
+        'void', // (as of PHP 7.1)
+        'iterable', // (as of PHP 7.1)
+        'object', // (as of PHP 7.2)
+        'mixed', // (as of PHP 8.0)
+        'never', // (as of PHP 8.1)
+        // Soft reserved words
+        'enum',
+        'resource',
+        'numeric',
     ];
 
     public function isReservedWord(string $name): bool
