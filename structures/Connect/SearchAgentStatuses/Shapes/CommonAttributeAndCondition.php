@@ -6,15 +6,11 @@ use Sunaoka\Aws\Structures\Shape;
 
 /**
  * @property list<TagCondition>|null $TagConditions
- * @property HierarchyGroupCondition|null $HierarchyGroupCondition
  */
 class CommonAttributeAndCondition extends Shape
 {
     /**
-     * @param array{
-     *     TagConditions?: list<TagCondition>|null,
-     *     HierarchyGroupCondition?: HierarchyGroupCondition|null
-     * } $args
+     * @param array{TagConditions?: list<TagCondition>|null} $args
      */
     public function __construct(array $args = [])
     {
