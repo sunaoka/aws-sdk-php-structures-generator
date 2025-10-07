@@ -15,7 +15,7 @@ $dirs = [
 
 $rules = [
     '@PhpCsFixer'            => true,
-    '@PER-CS2.0'             => true,
+    '@PER-CS3x0'             => true,
     'binary_operator_spaces' => [
         'default'   => 'single_space',
         'operators' => [
@@ -46,7 +46,7 @@ $rules = [
     'yoda_style'             => false,
 ];
 
-return (new PhpCsFixer\Config())
+return new PhpCsFixer\Config()
     ->setRules($rules)
     ->setIndent('    ')
     ->setLineEnding("\n")
