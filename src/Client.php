@@ -6,7 +6,7 @@ namespace Sunaoka\Aws\Structures\Generator;
 
 use Nette\PhpGenerator\PhpFile;
 use Nette\PhpGenerator\PhpNamespace;
-use Nette\PhpGenerator\PsrPrinter;
+use Sunaoka\Aws\Structures\Generator\PhpGenerator\Printer;
 
 readonly class Client
 {
@@ -49,7 +49,7 @@ readonly class Client
         $file = new PhpFile();
         $file->addNamespace($phpNamespace);
 
-        return new PsrPrinter()->printFile($file);
+        return new Printer()->printFile($file);
     }
 
     private function getClassName(string $service): string
