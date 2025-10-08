@@ -11,20 +11,38 @@ use Sunaoka\Aws\Structures\Generator\Shapes\Types;
  * @phpstan-import-type DataShape from \Sunaoka\Aws\Structures\Generator\Commands\GeneratorCommand
  * @phpstan-import-type Data      from \Sunaoka\Aws\Structures\Generator\Commands\GeneratorCommand
  */
-readonly class Generator
+class Generator
 {
+    /**
+     * @var string[]
+     */
+    private array $traits = [];
+
+    /**
+     * @var string[]
+     *
+     * @see https://github.com/aws/aws-sdk-php/issues/3194
+     */
+    private const array IGNORE_OPERATIONS = [
+        'GetApi',
+        'GetCommand',
+        'GetCredentials',
+        'GetEndpoint',
+        'GetToken',
+    ];
+
     /**
      * @param Data $data
      */
     public function __construct(
-        private array $data,
-        private string $namespace,
+        private readonly array $data,
+        private readonly string $namespace,
     ) {}
 
     /**
      * @param callable(string $fqcn, string $code): void $callback
      */
-    public function run(callable $callback): void
+    public function generateModel(callable $callback): self
     {
         $types = new Types($this->retrievePrimitiveTypes());
 
@@ -37,10 +55,29 @@ readonly class Generator
         }
 
         foreach (array_keys($this->data['operations']) as $action) {
+            if (in_array($action, self::IGNORE_OPERATIONS, true)) {
+                continue;
+            }
+
             $parser = new Parser($this->data, $action, $types, $structures);
             $model = new Model($parser, $this->namespace);
-            $model->generate($callback);
+            $model->generate(function (string $fqcn, string $code, string $type) use ($callback) {
+                if ($type === 'trait') {
+                    $this->traits[] = $fqcn;
+                }
+                $callback($fqcn, $code);
+            });
         }
+
+        return $this;
+    }
+
+    /**
+     * @param callable(string $fqcn, string $code): void $callback
+     */
+    public function generateClient(callable $callback): void
+    {
+        new Client($this->namespace, $this->traits)->generate($callback);
     }
 
     /**

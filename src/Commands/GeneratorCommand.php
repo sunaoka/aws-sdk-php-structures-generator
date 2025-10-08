@@ -15,6 +15,10 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 
 /**
  * @phpstan-type Manifest           array{namespace: string, versions: array<string, string>, serviceIdentifier: string}
+ * @phpstan-type AliasesAliases     array<string, string>
+ * @phpstan-type AliasesVersions    array<string, AliasesAliases>
+ * @phpstan-type AliasesOperations  array<string, AliasesVersions>
+ * @phpstan-type Aliases            array{operations: AliasesOperations}
  * @phpstan-type DataMetadata       array{apiVersion: string, serviceId: string}
  * @phpstan-type DataOperation      array{name: string, input?: array{shape: string}, output?: array{shape: string}, errors?: list<array{shape: string}>}
  * @phpstan-type DataShapeCommon    array{type: string, enum?: list<string>, min?: int, max?: int}
@@ -84,6 +88,15 @@ class GeneratorCommand extends Command
         return \Aws\manifest();
     }
 
+    /**
+     * @return Aliases
+     */
+    private function loadAliases(): array
+    {
+        /** @var Aliases */
+        return \Aws\load_compiled_json("{$this->modelsDirectory}/aliases.json");
+    }
+
     private function getModelsDirectory(): string
     {
         $sdkDir = InstalledVersions::getInstallPath('aws/aws-sdk-php');
@@ -109,12 +122,23 @@ class GeneratorCommand extends Command
     {
         $data = $this->getData($namespace, $version);
 
+        $aliases = $this->loadAliases();
+        foreach ($aliases['operations'][$data['metadata']['serviceId']][$data['metadata']['apiVersion']] ?? [] as $name => $alias) {
+            $data['operations'][$alias] = $data['operations'][$name];
+            unset($data['operations'][$name]);
+        }
+
         $classNamespace = "{$this->namespacePrefix}\\{$service}";
 
         $generator = new Generator($data, $classNamespace);
-        $generator->run(function (string $fqcn, string $code) {
-            $this->output("{$this->outputDirectory}/{$this->getFqcnToFilename($fqcn)}", $code);
-        });
+        $generator
+            ->generateModel(function (string $fqcn, string $code) {
+                $this->output("{$this->outputDirectory}/{$this->getFqcnToFilename($fqcn)}", $code);
+            })
+            ->generateClient(function (string $fqcn, string $code) {
+                $this->output("{$this->outputDirectory}/{$this->getFqcnToFilename($fqcn)}", $code);
+            })
+        ;
     }
 
     private function getFqcnToFilename(string $fqcn): string
@@ -135,7 +159,7 @@ class GeneratorCommand extends Command
     private function createParentDirectory(string $filename): void
     {
         $directory = dirname($filename);
-        if (is_dir($directory) === false && mkdir($directory, 0755, true) === false) {
+        if (is_dir($directory) === false && mkdir($directory, 0755, true) === false && is_dir($directory) === false) {
             throw new \RuntimeException("Failed to create directory: {$directory}");
         }
     }

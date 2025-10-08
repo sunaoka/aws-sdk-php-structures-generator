@@ -20,41 +20,94 @@ readonly class Model
     }
 
     /**
-     * @param callable(string $fqcn, string $code): void $callback
+     * @param callable(string $fqcn, string $code, string $type): void $callback
      */
     public function generate(callable $callback): void
     {
-        $action = $this->parser->action;
+        $namespace = $this->getNamespace();
+
+        $className = $this->getTraitName();
+        $code = $this->generatePhpTrait($namespace, $className);
+        $callback("{$namespace}\\{$className}", $code, 'trait');
 
         if ($this->parser->request !== null) {
-            $shapeName = $this->parser->request;
-            $namespace = "{$this->namespace}\\{$action}";
-            $className = "{$action}Request";
-            $code = $this->generatePhpCode($shapeName, $namespace, Request::class, $className);
-            $callback("{$namespace}\\{$className}", $code);
+            $className = $this->getRequestClassName();
+            $code = $this->generatePhpClass($this->parser->request, $namespace, Request::class, $className);
+            $callback("{$namespace}\\{$className}", $code, 'request');
         }
 
         if ($this->parser->response !== null) {
-            $shapeName = $this->parser->response;
-            $namespace = "{$this->namespace}\\{$action}";
-            $className = "{$action}Response";
-            $code = $this->generatePhpCode($shapeName, $namespace, Response::class, $className);
-            $callback("{$namespace}\\{$className}", $code);
+            $className = $this->getResponseClassName();
+            $code = $this->generatePhpClass($this->parser->response, $namespace, Response::class, $className);
+            $callback("{$namespace}\\{$className}", $code, 'response');
         }
 
         foreach ($this->parser->shapes as $shapeName) {
-            $namespace = "{$this->namespace}\\{$action}\\Shapes";
-            $code = $this->generatePhpCode($shapeName, $namespace, Shape::class);
-            $callback("{$namespace}\\{$this->getClassName($shapeName)}", $code);
+            $className = $this->getShapeClassName($shapeName);
+            $code = $this->generatePhpClass($shapeName, "{$namespace}\\Shapes", Shape::class, $className);
+            $callback("{$namespace}\\Shapes\\{$className}", $code, 'shape');
         }
     }
 
-    protected function generatePhpCode(string $shapeName, string $namespace, string $extends, ?string $className = null): string
+    protected function generatePhpTrait(string $namespace, string $className): string
+    {
+        $phpNamespace = new PhpNamespace($namespace);
+        $class = $phpNamespace->addTrait($className);
+
+        $comments = [];
+
+        $method = $class->addMethod($this->getMethodName());
+
+        if ($this->parser->request !== null) {
+            $parameter = new Parameter('args');
+            $parameter->setType("{$this->getNamespace()}\\{$this->getRequestClassName()}");
+            $method->setParameters([$parameter]);
+            $comments[] = "@param {$this->getRequestClassName()} \$args";
+        }
+
+        if ($this->parser->request !== null && $this->parser->response !== null) {
+            // [x] request / [x] response
+            $body = [
+                "\$result = parent::{$this->getMethodName()}(\$args->toArray());",
+                "return new {$this->getResponseClassName()}(\$result->toArray());",
+            ];
+            $comments[] = "@return {$this->getResponseClassName()}";
+
+        } elseif ($this->parser->request === null && $this->parser->response !== null) {
+            // [ ] request / [x] response
+            $body = [
+                "\$result = parent::{$this->getMethodName()}();",
+                "return new {$this->getResponseClassName()}(\$result->toArray());",
+            ];
+            $comments[] = "@return {$this->getResponseClassName()}";
+
+        } elseif ($this->parser->request !== null && $this->parser->response === null) {
+            // [x] request / [ ] response
+            $body = [
+                "parent::{$this->getMethodName()}(\$args->toArray());",
+            ];
+            $comments[] = '@return void';
+
+        } else {
+            // [ ] request / [ ] response
+            $body = [
+                "parent::{$this->getMethodName()}();",
+            ];
+            $comments[] = '@return void';
+        }
+
+        $method->setBody(implode("\n", $body));
+        $method->setComment(implode("\n", $comments));
+
+        return $this->getPhpCode($phpNamespace);
+    }
+
+    protected function generatePhpClass(string $shapeName, string $namespace, string $extends, string $className): string
     {
         $phpNamespace = new PhpNamespace($namespace);
         $phpNamespace->addUse($extends);
 
-        $class = $phpNamespace->addClass($className ?? $this->getClassName($shapeName));
+        $class = $phpNamespace->addClass($className);
         $class->setExtends($extends);
 
         $shape = $this->parser->data['shapes'][$shapeName];
@@ -73,17 +126,8 @@ readonly class Model
         /** @var array<string, array{type: string, null: string, nullable: bool}> $properties */
         $properties = [];
         foreach ($params as $name => $type) {
-            $isRequired = (function () use ($name, $type, $extends, $shape): bool {
-                if ($extends === Response::class && $type === '\Psr\Http\Message\StreamInterface') {
-                    return true;
-                }
-
-                if (in_array($name, $shape['required'] ?? [], true)) {
-                    return true;
-                }
-
-                return false;
-            })();
+            $isRequired = ($extends === Response::class && $type === '\Psr\Http\Message\StreamInterface')
+                || in_array($name, $shape['required'] ?? [], true);
 
             $properties[$name] = [
                 'type' => $type . ($isRequired ? '' : '|null'),
@@ -135,7 +179,7 @@ readonly class Model
         return new PsrPrinter()->printFile($file);
     }
 
-    private function getClassName(string $name): string
+    private function getShapeClassName(string $name): string
     {
         return $this->parser->structures->get($name);
     }
@@ -144,12 +188,37 @@ readonly class Model
     {
         $className = $this->parser->types->has($name)
             ? $this->parser->types->get($name)
-            : "Shapes\\{$this->getClassName($name)}";
+            : "Shapes\\{$this->getShapeClassName($name)}";
 
         if (str_contains($className, 'Shapes\\') && str_ends_with($namespace, '\Shapes')) {
             return str_replace('Shapes\\', '', $className);
         }
 
         return $className;
+    }
+
+    private function getNamespace(): string
+    {
+        return "{$this->namespace}\\{$this->parser->action}";
+    }
+
+    private function getTraitName(): string
+    {
+        return "{$this->parser->action}Trait";
+    }
+
+    private function getRequestClassName(): string
+    {
+        return "{$this->parser->action}Request";
+    }
+
+    private function getResponseClassName(): string
+    {
+        return "{$this->parser->action}Response";
+    }
+
+    private function getMethodName(): string
+    {
+        return lcfirst($this->parser->action);
     }
 }
