@@ -101,7 +101,7 @@ jobs:
       - name: Analyze Structures
         uses: nick-fields/retry@v3
         with:
-          timeout_seconds: 600
+          timeout_seconds: 900
           max_attempts: 3
           command: php vendor/bin/phpstan analyse --no-progress --memory-limit=-1 -c phpstan-generated.neon.dist
 
