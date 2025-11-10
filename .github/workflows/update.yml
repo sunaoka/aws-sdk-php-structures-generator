@@ -88,7 +88,9 @@ jobs:
         with:
           timeout_seconds: 900
           max_attempts: 3
-          command: php bin/app.php app:generate --no-progress
+          command: |
+            rm -rf structures/*
+            php bin/app.php app:generate --no-progress
 
       - name: Restore PHPStan Result cache
         uses: actions/cache/restore@v4
