@@ -11,7 +11,7 @@
     ],
     "require": {
         "php": "8.4.*",
-        "aws/aws-sdk-php": "3.359.11",
+        "aws/aws-sdk-php": "3.359.12",
         "nette/php-generator": "^4.2.0",
         "symfony/console": "^7.3.4"
     },
