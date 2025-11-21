@@ -89,6 +89,7 @@ class Ec2Client extends \Aws\Ec2\Ec2Client
     use CreateInstanceEventWindow\CreateInstanceEventWindowTrait;
     use CreateInstanceExportTask\CreateInstanceExportTaskTrait;
     use CreateInternetGateway\CreateInternetGatewayTrait;
+    use CreateInterruptibleCapacityReservationAllocation\CreateInterruptibleCapacityReservationAllocationTrait;
     use CreateIpam\CreateIpamTrait;
     use CreateIpamExternalResourceVerificationToken\CreateIpamExternalResourceVerificationTokenTrait;
     use CreateIpamPolicy\CreateIpamPolicyTrait;
@@ -748,6 +749,7 @@ class Ec2Client extends \Aws\Ec2\Ec2Client
     use UnlockSnapshot\UnlockSnapshotTrait;
     use UnmonitorInstances\UnmonitorInstancesTrait;
     use UpdateCapacityManagerOrganizationsAccess\UpdateCapacityManagerOrganizationsAccessTrait;
+    use UpdateInterruptibleCapacityReservationAllocation\UpdateInterruptibleCapacityReservationAllocationTrait;
     use UpdateSecurityGroupRuleDescriptionsEgress\UpdateSecurityGroupRuleDescriptionsEgressTrait;
     use UpdateSecurityGroupRuleDescriptionsIngress\UpdateSecurityGroupRuleDescriptionsIngressTrait;
     use WithdrawByoipCidr\WithdrawByoipCidrTrait;
