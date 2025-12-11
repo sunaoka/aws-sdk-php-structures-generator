@@ -39,15 +39,6 @@ jobs:
             echo "need_update=1" >> "$GITHUB_OUTPUT"
           fi
 
-      - name: Save Vendor cache
-        uses: actions/cache/save@v4
-        if: steps.check-aws-sdk.outputs.need_update == '1'
-        with:
-          path: |
-            vendor
-            composer.lock
-          key: "vendor-cache-${{ github.run_id }}"
-
 
   update:
 
@@ -66,16 +57,6 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Restore Vendor cache
-        uses: actions/cache/restore@v4
-        with:
-          path: |
-            vendor
-            composer.lock
-          key: "vendor-cache-${{ github.run_id }}"
-          restore-keys: |
-            vendor-cache-
-
       - name: Bump AWS SDK for PHP
         id: bump-aws-sdk
         run: |
@@ -92,27 +73,12 @@ jobs:
             rm -rf structures/*
             php bin/app.php app:generate --no-progress
 
-      - name: Restore PHPStan Result cache
-        uses: actions/cache/restore@v4
-        with:
-          path: vendor/phpstan/phpstan/tmp
-          key: "phpstan-result-cache-${{ github.run_id }}"
-          restore-keys: |
-            phpstan-result-cache-
-
       - name: Analyze Structures
         uses: nick-fields/retry@v3
         with:
           timeout_seconds: 900
           max_attempts: 3
           command: php vendor/bin/phpstan analyse --no-progress --memory-limit=-1 -c phpstan-generated.neon.dist
-
-      - name: Save PHPStan Result cache
-        uses: actions/cache/save@v4
-        if: always()
-        with:
-          path: vendor/phpstan/phpstan/tmp
-          key: "phpstan-result-cache-${{ github.run_id }}"
 
       - name: Commit Files
         run: |
