@@ -57,12 +57,23 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Install dependencies
+        uses: nick-fields/retry@v3
+        with:
+          timeout_seconds: 120
+          max_attempts: 3
+          command: composer install --quiet --no-plugins --no-ansi --prefer-dist --no-progress --no-interaction
+
       - name: Bump AWS SDK for PHP
         id: bump-aws-sdk
-        run: |
-          version=$(composer outdated aws/aws-sdk-php --format=json | jq -r .latest)
-          echo "version=$version" >> "$GITHUB_OUTPUT"
-          composer require aws/aws-sdk-php:$version --quiet --no-plugins --no-ansi --prefer-dist --no-progress --no-interaction
+        uses: nick-fields/retry@v3
+        with:
+          timeout_seconds: 120
+          max_attempts: 3
+          command: |
+            version=$(composer outdated aws/aws-sdk-php --format=json | jq -r .latest)
+            echo "version=$version" >> "$GITHUB_OUTPUT"
+            composer require aws/aws-sdk-php:$version --quiet --no-plugins --no-ansi --prefer-dist --no-progress --no-interaction
 
       - name: Update Structures
         uses: nick-fields/retry@v3
