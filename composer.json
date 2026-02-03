@@ -10,15 +10,15 @@
         }
     ],
     "require": {
-        "php": "8.4.*",
+        "php": "8.5.*",
         "aws/aws-sdk-php": "3.369.24",
         "nette/php-generator": "^4.2.0",
-        "symfony/console": "^7.3.4"
+        "symfony/console": "^8.0.4"
     },
     "require-dev": {
         "friendsofphp/php-cs-fixer": "^3.88.2",
         "phpstan/phpstan": "^2.1.30",
-        "symfony/var-dumper": "^7.3.4"
+        "symfony/var-dumper": "^8.0.4"
     },
     "autoload": {
         "psr-4": {
