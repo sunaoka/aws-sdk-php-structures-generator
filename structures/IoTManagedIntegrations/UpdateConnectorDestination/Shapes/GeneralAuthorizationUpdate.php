@@ -5,15 +5,15 @@ namespace Sunaoka\Aws\Structures\IoTManagedIntegrations\UpdateConnectorDestinati
 use Sunaoka\Aws\Structures\Shape;
 
 /**
- * @property OAuthUpdate|null $oAuthUpdate
- * @property GeneralAuthorizationUpdate|null $GeneralAuthorizationUpdate
+ * @property list<AuthMaterial>|null $AuthMaterialsToAdd
+ * @property list<AuthMaterial>|null $AuthMaterialsToUpdate
  */
-class AuthConfigUpdate extends Shape
+class GeneralAuthorizationUpdate extends Shape
 {
     /**
      * @param array{
-     *     oAuthUpdate?: OAuthUpdate|null,
-     *     GeneralAuthorizationUpdate?: GeneralAuthorizationUpdate|null
+     *     AuthMaterialsToAdd?: list<AuthMaterial>|null,
+     *     AuthMaterialsToUpdate?: list<AuthMaterial>|null
      * } $args
      */
     public function __construct(array $args = [])
