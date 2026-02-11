@@ -5,19 +5,15 @@ namespace Sunaoka\Aws\Structures\S3Tables\CreateTable\Shapes;
 use Sunaoka\Aws\Structures\Shape;
 
 /**
- * @property int|null $id
- * @property string $name
- * @property string $type
- * @property bool|null $required
+ * @property list<IcebergPartitionField> $fields
+ * @property int|null $specId
  */
-class SchemaField extends Shape
+class IcebergPartitionSpec extends Shape
 {
     /**
      * @param array{
-     *     id?: int|null,
-     *     name: string,
-     *     type: string,
-     *     required?: bool|null
+     *     fields: list<IcebergPartitionField>,
+     *     specId?: int|null
      * } $args
      */
     public function __construct(array $args)
