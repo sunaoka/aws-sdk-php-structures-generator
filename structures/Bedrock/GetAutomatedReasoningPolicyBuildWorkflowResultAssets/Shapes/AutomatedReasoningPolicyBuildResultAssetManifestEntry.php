@@ -1,22 +1,20 @@
 <?php
 
-namespace Sunaoka\Aws\Structures\Bedrock\GetAutomatedReasoningPolicyBuildWorkflowResultAssets;
+namespace Sunaoka\Aws\Structures\Bedrock\GetAutomatedReasoningPolicyBuildWorkflowResultAssets\Shapes;
 
-use Sunaoka\Aws\Structures\Request;
+use Sunaoka\Aws\Structures\Shape;
 
 /**
- * @property string $policyArn
- * @property string $buildWorkflowId
  * @property 'BUILD_LOG'|'QUALITY_REPORT'|'POLICY_DEFINITION'|'GENERATED_TEST_CASES'|'POLICY_SCENARIOS'|'FIDELITY_REPORT'|'ASSET_MANIFEST'|'SOURCE_DOCUMENT' $assetType
+ * @property string|null $assetName
  * @property string|null $assetId
  */
-class GetAutomatedReasoningPolicyBuildWorkflowResultAssetsRequest extends Request
+class AutomatedReasoningPolicyBuildResultAssetManifestEntry extends Shape
 {
     /**
      * @param array{
-     *     policyArn: string,
-     *     buildWorkflowId: string,
      *     assetType: 'BUILD_LOG'|'QUALITY_REPORT'|'POLICY_DEFINITION'|'GENERATED_TEST_CASES'|'POLICY_SCENARIOS'|'FIDELITY_REPORT'|'ASSET_MANIFEST'|'SOURCE_DOCUMENT',
+     *     assetName?: string|null,
      *     assetId?: string|null
      * } $args
      */
