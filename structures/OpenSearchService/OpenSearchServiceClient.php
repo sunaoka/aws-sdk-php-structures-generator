@@ -37,6 +37,7 @@ class OpenSearchServiceClient extends \Aws\OpenSearchService\OpenSearchServiceCl
     use DescribeDomains\DescribeDomainsTrait;
     use DescribeDryRunProgress\DescribeDryRunProgressTrait;
     use DescribeInboundConnections\DescribeInboundConnectionsTrait;
+    use DescribeInsightDetails\DescribeInsightDetailsTrait;
     use DescribeInstanceTypeLimits\DescribeInstanceTypeLimitsTrait;
     use DescribeOutboundConnections\DescribeOutboundConnectionsTrait;
     use DescribePackages\DescribePackagesTrait;
@@ -61,6 +62,7 @@ class OpenSearchServiceClient extends \Aws\OpenSearchService\OpenSearchServiceCl
     use ListDomainMaintenances\ListDomainMaintenancesTrait;
     use ListDomainNames\ListDomainNamesTrait;
     use ListDomainsForPackage\ListDomainsForPackageTrait;
+    use ListInsights\ListInsightsTrait;
     use ListInstanceTypeDetails\ListInstanceTypeDetailsTrait;
     use ListPackagesForDomain\ListPackagesForDomainTrait;
     use ListScheduledActions\ListScheduledActionsTrait;
