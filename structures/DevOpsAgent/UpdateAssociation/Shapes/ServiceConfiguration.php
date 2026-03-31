@@ -18,7 +18,6 @@ use Sunaoka\Aws\Structures\Shape;
  * @property AzureDevOpsConfiguration|null $azuredevops
  * @property MCPServerGrafanaConfiguration|null $mcpservergrafana
  * @property PagerDutyConfiguration|null $pagerduty
- * @property MSTeamsConfiguration|null $msteams
  */
 class ServiceConfiguration extends Shape
 {
@@ -36,8 +35,7 @@ class ServiceConfiguration extends Shape
      *     azure?: AzureConfiguration|null,
      *     azuredevops?: AzureDevOpsConfiguration|null,
      *     mcpservergrafana?: MCPServerGrafanaConfiguration|null,
-     *     pagerduty?: PagerDutyConfiguration|null,
-     *     msteams?: MSTeamsConfiguration|null
+     *     pagerduty?: PagerDutyConfiguration|null
      * } $args
      */
     public function __construct(array $args = [])

@@ -5,7 +5,7 @@ namespace Sunaoka\Aws\Structures\DevOpsAgent\RegisterService;
 use Sunaoka\Aws\Structures\Request;
 
 /**
- * @property 'dynatrace'|'servicenow'|'pagerduty'|'gitlab'|'eventChannel'|'mcpservernewrelic'|'mcpservergrafana'|'mcpserverdatadog'|'mcpserver'|'mcpserversplunk'|'azureidentity'|'mcpserversigv4' $service
+ * @property 'dynatrace'|'servicenow'|'pagerduty'|'gitlab'|'eventChannel'|'mcpservernewrelic'|'mcpservergrafana'|'mcpserverdatadog'|'mcpserver'|'mcpserversplunk'|'azureidentity' $service
  * @property Shapes\ServiceDetails $serviceDetails
  * @property string|null $kmsKeyArn
  * @property string|null $privateConnectionName
@@ -16,7 +16,7 @@ class RegisterServiceRequest extends Request
 {
     /**
      * @param array{
-     *     service: 'dynatrace'|'servicenow'|'pagerduty'|'gitlab'|'eventChannel'|'mcpservernewrelic'|'mcpservergrafana'|'mcpserverdatadog'|'mcpserver'|'mcpserversplunk'|'azureidentity'|'mcpserversigv4',
+     *     service: 'dynatrace'|'servicenow'|'pagerduty'|'gitlab'|'eventChannel'|'mcpservernewrelic'|'mcpservergrafana'|'mcpserverdatadog'|'mcpserver'|'mcpserversplunk'|'azureidentity',
      *     serviceDetails: Shapes\ServiceDetails,
      *     kmsKeyArn?: string|null,
      *     privateConnectionName?: string|null,

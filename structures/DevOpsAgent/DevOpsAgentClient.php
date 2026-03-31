@@ -14,11 +14,9 @@ class DevOpsAgentClient extends \Aws\DevOpsAgent\DevOpsAgentClient
     use DeletePrivateConnection\DeletePrivateConnectionTrait;
     use DeregisterService\DeregisterServiceTrait;
     use DescribePrivateConnection\DescribePrivateConnectionTrait;
-    use DescribeSupportLevel\DescribeSupportLevelTrait;
     use DisableOperatorApp\DisableOperatorAppTrait;
     use DisassociateService\DisassociateServiceTrait;
     use EnableOperatorApp\EnableOperatorAppTrait;
-    use EndChatForCase\EndChatForCaseTrait;
     use GetAccountUsage\GetAccountUsageTrait;
     use GetAgentSpace\GetAgentSpaceTrait;
     use GetAssociation\GetAssociationTrait;
@@ -26,7 +24,6 @@ class DevOpsAgentClient extends \Aws\DevOpsAgent\DevOpsAgentClient
     use GetOperatorApp\GetOperatorAppTrait;
     use GetRecommendation\GetRecommendationTrait;
     use GetService\GetServiceTrait;
-    use InitiateChatForCase\InitiateChatForCaseTrait;
     use ListAgentSpaces\ListAgentSpacesTrait;
     use ListAssociations\ListAssociationsTrait;
     use ListBacklogTasks\ListBacklogTasksTrait;
