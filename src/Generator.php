@@ -111,18 +111,18 @@ class Generator
 
         return match ($shape['type']) {
             'string', 'byte', 'character' => 'string',
-            'integer', 'long' => (fn() => match (true) {
+            'integer', 'long'             => (fn() => match (true) {
                 isset($shape['min'], $shape['max']) => "int<{$shape['min']}, {$shape['max']}>",
                 isset($shape['min'])                => "int<{$shape['min']}, max>",
                 isset($shape['max'])                => "int<min, {$shape['max']}>",
                 default                             => 'int',
             })(),
-            'float'     => 'float',
-            'double'    => 'double',
-            'boolean'   => 'bool',
-            'timestamp' => '\Aws\Api\DateTimeResult',
+            'float'                            => 'float',
+            'double'                           => 'double',
+            'boolean'                          => 'bool',
+            'timestamp'                        => '\Aws\Api\DateTimeResult',
             'blob', 'list', 'map', 'structure' => null,
-            default => throw new \InvalidArgumentException("Unknown type: {$shape['type']}"),
+            default                            => throw new \InvalidArgumentException("Unknown type: {$shape['type']}"),
         };
     }
 }
