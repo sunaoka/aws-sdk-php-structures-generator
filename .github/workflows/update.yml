@@ -12,15 +12,15 @@ jobs:
 
     steps:
       - name: Setup PHP
-        uses: shivammathur/setup-php@v2
+        uses: shivammathur/setup-php@f3e473d116dcccaddc5834248c87452386958240 # 2.37.2
         with:
           php-version: '8.5'
 
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: Install dependencies
-        uses: nick-fields/retry@v4
+        uses: nick-fields/retry@ad984534de44a9489a53aefd81eb77f87c70dc60 # v4.0.0
         with:
           timeout_seconds: 120
           max_attempts: 3
@@ -42,7 +42,7 @@ jobs:
       - name: Bump AWS SDK for PHP
         if: steps.check-aws-sdk.outputs.need_update == '1'
         id: bump-aws-sdk
-        uses: nick-fields/retry@v4
+        uses: nick-fields/retry@ad984534de44a9489a53aefd81eb77f87c70dc60 # v4.0.0
         with:
           timeout_seconds: 120
           max_attempts: 3
@@ -53,7 +53,7 @@ jobs:
 
       - name: Update Structures
         if: steps.check-aws-sdk.outputs.need_update == '1'
-        uses: nick-fields/retry@v4
+        uses: nick-fields/retry@ad984534de44a9489a53aefd81eb77f87c70dc60 # v4.0.0
         with:
           timeout_seconds: 900
           max_attempts: 3
@@ -63,7 +63,7 @@ jobs:
 
       - name: Analyze Structures
         if: steps.check-aws-sdk.outputs.need_update == '1'
-        uses: nick-fields/retry@v4
+        uses: nick-fields/retry@ad984534de44a9489a53aefd81eb77f87c70dc60 # v4.0.0
         with:
           timeout_seconds: 900
           max_attempts: 3
